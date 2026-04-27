@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "design-system-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "f1554c36a832c3586b69294c8a32e7c371edd4a42bbef9aa5ca4394769d3511d"
+    }
+  }
+}
