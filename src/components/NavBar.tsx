@@ -1,4 +1,3 @@
-import Button from './Button';
 import Logo from './Logo';
 import { MdOutlineMovieFilter as AddIcon } from 'react-icons/md';
 const NavBar = () => {
@@ -7,9 +6,9 @@ const NavBar = () => {
             <a href="/">
                 <Logo />
             </a>
-            <Button className="group relative cursor-pointer hover:scale-105 transition-all duration-150 ease-in-out active:scale-95">
+            <button className="group relative cursor-pointer hover:scale-105 transition-all duration-150 ease-in-out active:scale-95">
                 <AddIcon className="fill-primary z-12 " size={36} />
-            </Button>
+            </button>
         </nav>
     );
 };
