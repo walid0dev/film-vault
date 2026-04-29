@@ -1,18 +1,21 @@
-import { motion, AnimatePresence, type Variants } from 'motion/react';
+import { motion } from 'motion/react';
 import type { Movie } from '../types';
 import { FaStar } from 'react-icons/fa';
-import { useState } from 'react';
 import { getRandomPatternImg } from '../utils';
 import ImageFallback from './ui/ImageFallback';
+
 type MovieCardProps = {
     movie: Movie;
+    onClick: () => void;
 };
 
-const MovieCard = ({ movie }: MovieCardProps) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-
+const MovieCard = ({ movie, onClick }: MovieCardProps) => {
     return (
-        <motion.div className="relative flex flex-col rounded-lg bg-card text-card-foreground shadow-lg overflow-hidden">
+        <motion.div
+            layoutId={movie.id}
+            onClick={onClick}
+            className="relative hover:scale-105 hover:shadow-lg duration-150 ease-in-out transition-all flex flex-col rounded-2xl corner-scoop bg-card text-card-foreground shadow-lg overflow-hidden cursor-pointer"
+        >
             <div className="relative h-92 w-full">
                 <ImageFallback
                     src={movie.poster}
@@ -22,10 +25,10 @@ const MovieCard = ({ movie }: MovieCardProps) => {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4">
-                    <h3 className="text-2xl font-bold text-white">
+                    <h3 className="text-2xl font-bold text-foreground">
                         {movie.title}
                     </h3>
-                    <p className="text-sm text-gray-300">
+                    <p className="text-sm text-muted-foreground">
                         {movie.genres.join(', ')}
                     </p>
                 </div>
