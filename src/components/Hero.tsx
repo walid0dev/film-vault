@@ -1,7 +1,8 @@
 import { FaStar } from 'react-icons/fa';
 import type { Movie } from '../types/index.ts';
-import Button from './Button.tsx';
-
+import { Button } from './ui/button.tsx';
+import { MdInfo as InfoIcon } from 'react-icons/md';
+import ImageFallback from './ui/ImageFallback.tsx';
 type HeroProps = {
     movie: Movie;
 };
@@ -18,7 +19,7 @@ const Hero = ({ movie }: HeroProps) => {
             <div className="relative z-10 flex h-full items-center justify-end p-8 md:p-16">
                 <div className="w-full max-w-md rounded-2xl bg-card/80 p-6 shadow-2xl backdrop-blur-md">
                     <div className="flex gap-6">
-                        <img
+                        <ImageFallback
                             src={movie.poster}
                             alt={movie.title}
                             className="h-48 w-32 rounded-lg object-cover shadow-lg"
@@ -52,8 +53,11 @@ const Hero = ({ movie }: HeroProps) => {
                         {movie.plot}
                     </p>
                     <div className="mt-6 flex gap-4">
-                        <Button>Watch Trailer</Button>
-                        <Button variant="outline">More Info</Button>
+                        <Button size={'lg'}>Watch Trailer</Button>
+                        <Button variant="secondary" size={'lg'}>
+                            <InfoIcon />
+                            More Info
+                        </Button>
                     </div>
                 </div>
             </div>

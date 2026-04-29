@@ -250,18 +250,6 @@
         "votes": 646
     },
     {
-        "plot": "A newly wedded couple attempt to build a house with a prefabricated kit, unaware that a rival sabotaged the kit's component numbering.",
-        "genres": ["Short", "Comedy"],
-        "runtime": 25,
-        "cast": ["Buster Keaton", "Sybil Seely"],
-        "title": "One Week",
-        "rated": "TV-G",
-        "id": "573a1391f29313caabcd6e2a",
-        "date": "1920-09-01T00:00:00.000Z",
-        "rating": 8.3,
-        "votes": 3942
-    },
-    {
         "plot": "The simple-minded son of a rich financier must find his own way in the world.",
         "genres": ["Comedy"],
         "runtime": 77,
@@ -478,4 +466,3 @@
         "votes": 1276
     }
 ]
-
