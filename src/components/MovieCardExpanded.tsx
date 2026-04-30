@@ -19,22 +19,21 @@ const MovieCardExpanded = ({ movie, onClose }: MovieCardExpandedProps) => {
                 className="fixed inset-0 bg-background/20 backdrop-blur-md z-40"
                 onClick={onClose}
             />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 ">
+            <div className="fixed inset-0 z-10000 flex items-center justify-center">
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
                     layoutId={movie.id}
-                    className="relative w-3/5  bg-card text-card-foreground rounded-2xl shadow-lg overflow-hidden"
+                    className="relative w-3/5 h-full max-h-[90vh] bg-card text-card-foreground rounded-3xl shadow-lg flex flex-col overflow-hidden"
                 >
-                    <div className="relative h-72">
+                    <div className="relative h-72 shrink-0">
                         <ImageFallback
                             src={movie.poster}
                             fallbackSrc={getRandomPatternImg()}
                             alt={movie.title}
                             className="h-full w-full object-cover object-top"
                         />
-                        <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
                         <div className="absolute bottom-6 left-6 text-white">
                             <motion.h2
                                 className="text-4xl font-bold"
@@ -61,13 +60,13 @@ const MovieCardExpanded = ({ movie, onClose }: MovieCardExpandedProps) => {
                         </div>
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/60 transition-colors"
+                            className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/60 transition-colors z-10"
                         >
                             <FaTimes />
                         </button>
                     </div>
                     <motion.div
-                        className="p-6"
+                        className="p-6 overflow-y-auto relative"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
@@ -126,6 +125,7 @@ const MovieCardExpanded = ({ movie, onClose }: MovieCardExpandedProps) => {
                                 </div>
                             </div>
                         </div>
+                        
                     </motion.div>
                 </motion.div>
             </div>

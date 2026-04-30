@@ -18,8 +18,6 @@ function App() {
                 movie={movies.toSorted((a, b) => b.rating - a.rating).at(0)!}
             />
             <Featured
-                selectedId={selectedId}
-                setSelectedId={setSelectedId}
                 movies={movies}
             />
             <MovieList
