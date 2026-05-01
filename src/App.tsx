@@ -1,36 +1,26 @@
 import NavBar from './components/NavBar';
 import Hero from './components/Hero.tsx';
 import './index.css';
-import Movies from './data/movie-data.ts';
-import { useState } from 'react';
 import Featured from './components/Featured.tsx';
 import MovieList from './MovieList.tsx';
 import Form from './components/Form.tsx';
+import { useAppStore, usePersistMovies, getSortedMovies } from './hooks';
 function App() {
-    const [movies, setMovies] = useState(Movies);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [isFormOpen, setFormOpen] = useState(false);
+    const {
+        state: { movies, editingId },
+    } = useAppStore();
+
+    usePersistMovies();
+
+    const topMovie = getSortedMovies(movies).at(0);
 
     return (
-        <main className="dark bg-background ">
-            <NavBar setFormOpen={setFormOpen} />
-            <Hero
-                movie={movies.toSorted((a, b) => b.rating - a.rating).at(0)!}
-            />
-            <Featured
-                movies={movies}
-            />
-            <MovieList
-                selectedId={selectedId}
-                setSelectedId={setSelectedId}
-                movies={movies}
-            />
-            <Form
-                movies={movies}
-                setMovies={setMovies}
-                isOpen={isFormOpen}
-                setOpen={setFormOpen}
-            />
+        <main className="dark bg-background text-foreground">
+            <NavBar />
+            {topMovie && <Hero movie={topMovie} />}
+            <Featured movies={movies} />
+            <MovieList />
+            <Form key={editingId ?? 'new'} />
         </main>
     );
 }

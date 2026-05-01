@@ -1,51 +1,76 @@
-import moviesData from '@/data/movie-data';
+import { useEffect, useState } from 'react';
 import type { Movie } from '@/types';
-import { useState } from 'react';
-const storageKey = 'movies'; // best practice or something... ^_^
-export function useLocalStorage() {
-    const retriveMovies = (): Movie[] => {
-        try {
-            const data = localStorage.getItem(storageKey);
-            if (!data) return [];
-            const movies = JSON.parse(data);
-            // should do some validation here but we just make sure the app doesn't crash
-            if (!Array.isArray(movies)) return [];
-            return movies as Movie[];
-        } catch (e) {
-            console.log(e);
-            return [];
-        }
-    };
+import {
+    closeForm,
+    deleteMovie,
+    editMovie,
+    getAppState,
+    openForm,
+    saveMoviesToStorage,
+    selectMovie,
+    setRatingRange,
+    setReleaseYearRange,
+    subscribeAppState,
+    addMovie,
+    upsertMovie,
+} from '@/store/app-store';
 
-    const saveMovies = (movies: Movie[]) => {
-        const existing = retriveMovies();
-        for (let idx = 0; idx <= movies.length - 1; idx++) {
-            const movie = existing[idx];
-            const duplicateMovieIndex = existing.indexOf(movie);
-            if (duplicateMovieIndex === -1) {
-                existing.push(movie);
-            } else {
-                existing[idx] = movie;
-            }
-        }
-        localStorage.setItem(storageKey, JSON.stringify(existing));
-    };
+export function useAppStore() {
+    const [state, setState] = useState(() => getAppState());
 
-    return { retriveMovies, saveMovies };
+    useEffect(() => {
+        return subscribeAppState(() => {
+            setState(getAppState());
+        });
+    }, []);
+
+    return {
+        state,
+        actions: {
+            openForm,
+            closeForm,
+            selectMovie,
+            setRatingRange,
+            setReleaseYearRange,
+            editMovie,
+            addMovie,
+            upsertMovie,
+            deleteMovie,
+        },
+    };
 }
 
-export function useMovies() {
-    const { retriveMovies, saveMovies } = useLocalStorage();
-    const [movies, setMovies] = useState(moviesData);
+export function usePersistMovies() {
+    const {
+        state: { movies },
+    } = useAppStore();
 
-    const sortedMovies = movies.sort((a, b) => b.rating - a.rating);
-    const topMovie = sortedMovies.at(0)!;
-    const topThreeMovies = sortedMovies.slice(1, 4);
-    const addMovie = (m: Movie) => {
-        setMovies([...movies, m]);
-        saveMovies(movies);
-    };
-    const deleteMovie = (id: string) => {
-        setMovies(movies.filter((m) => m.id !== id));
-    };
+    useEffect(() => {
+        saveMoviesToStorage(movies);
+    }, [movies]);
+}
+
+export function getSortedMovies(movies: Movie[]) {
+    return [...movies].sort((a, b) => b.rating - a.rating);
+}
+
+export function getVisibleMovies(params: {
+    movies: Movie[];
+    ratingRange: [number, number];
+    releaseYearRange: [number, number];
+}) {
+    const { movies, ratingRange, releaseYearRange } = params;
+    const [minRating, maxRating] = ratingRange;
+    const [minYear, maxYear] = releaseYearRange;
+
+    return getSortedMovies(movies).filter((movie) => {
+        const ratingOk = movie.rating >= minRating && movie.rating <= maxRating;
+
+        const year = new Date(movie.date).getFullYear();
+        const yearOk = Number.isFinite(year)
+            ? year >= minYear && year <= maxYear
+            : true;
+
+        return ratingOk && yearOk;
+    });
 }
