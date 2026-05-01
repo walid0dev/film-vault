@@ -3,6 +3,8 @@ import type { Movie } from '../types';
 import { FaStar, FaTimes } from 'react-icons/fa';
 import ImageFallback from './ui/ImageFallback';
 import { getRandomPatternImg } from '../utils';
+import { useAppStore } from '@/hooks';
+import { Button } from '@/components/ui/button';
 
 type MovieCardExpandedProps = {
     movie: Movie;
@@ -10,6 +12,8 @@ type MovieCardExpandedProps = {
 };
 
 const MovieCardExpanded = ({ movie, onClose }: MovieCardExpandedProps) => {
+    const { actions } = useAppStore();
+
     return (
         <>
             <motion.div
@@ -70,6 +74,28 @@ const MovieCardExpanded = ({ movie, onClose }: MovieCardExpandedProps) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
+                        <div className="flex justify-end gap-2 mb-4">
+                            <Button
+                                variant="secondary"
+                                size={'lg'}
+                                onClick={() => {
+                                    onClose();
+                                    actions.editMovie(movie.id);
+                                }}
+                            >
+                                Edit
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size={'lg'}
+                                onClick={() => {
+                                    actions.deleteMovie(movie.id);
+                                    onClose();
+                                }}
+                            >
+                                Delete
+                            </Button>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="md:col-span-2">
                                 <h3 className="text-xl font-bold mb-2">Plot</h3>

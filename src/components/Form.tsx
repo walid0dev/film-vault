@@ -3,69 +3,47 @@ import { Input } from '@/components/ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAppStore } from '@/hooks';
 
-interface FormProps {
-    movies: Movie[];
-    setMovies: React.Dispatch<React.SetStateAction<Movie[]>>;
-    isOpen: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+const emptyMovie: Movie = {
+    id: '',
+    title: '',
+    plot: '',
+    poster: '',
+    date: '',
+    rated: '',
+    runtime: 0,
+    rating: 0,
+    votes: 0,
+    genres: [],
+    cast: [],
+};
 
-interface AddMode extends FormProps {
-    edit: false;
-    movie: never;
-}
+const Form = () => {
+    const {
+        state: { isFormOpen, movies, editingId },
+        actions,
+    } = useAppStore();
 
-interface EditMode extends FormProps {
-    edit: true;
-    movie: Movie;
-}
+    const editingMovie = editingId
+        ? movies.find((m) => m.id === editingId) ?? null
+        : null;
 
-type Props = AddMode | EditMode;
-
-const Form = ({ movies, setMovies, isOpen, setOpen, edit, movie }: Props) => {
-    const [formData, setFormData] = useState<Movie>(
-        () =>
-            movie || {
-                id: '',
-                title: '',
-                plot: '',
-                poster: '',
-                date: '',
-                rated: '',
-                runtime: 0,
-                rating: 0,
-                votes: 0,
-                genres: [],
-                cast: [],
-            }
-    );
-    useEffect(() => {
-        if (edit && movie) {
-            setFormData(movie);
-        } else {
-            setFormData({
-                id: '',
-                title: '',
-                plot: '',
-                poster: '',
-                date: '',
-                rated: '',
-                runtime: 0,
-                rating: 0,
-                votes: 0,
-                genres: [],
-                cast: [],
-            });
-        }
-    }, [edit, movie]);
+    const [formData, setFormData] = useState<Movie>(() => editingMovie ?? emptyMovie);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (name === 'runtime' || name === 'rating' || name === 'votes') {
+            const numValue = value === '' ? 0 : Number(value);
+            setFormData((prev) => ({ ...prev, [name]: numValue } as Movie));
+            return;
+        }
+
+        setFormData((prev) => ({ ...prev, [name]: value } as Movie));
     };
 
     const handleArrayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,31 +56,29 @@ const Form = ({ movies, setMovies, isOpen, setOpen, edit, movie }: Props) => {
 
     const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
-        if (edit) {
-            const updatedMovies = movies.map((m) =>
-                m.id === movie.id ? formData : m
-            );
-            setMovies(updatedMovies);
-        } else {
-            const newMovie = { ...formData, id: Date.now().toString() };
 
-            setMovies([...movies, newMovie]);
-        }
+        const movieToSave: Movie = {
+            ...formData,
+            id: formData.id || editingId || Date.now().toString(),
+        };
 
-        setOpen(false);
+        actions.upsertMovie(movieToSave);
+        actions.closeForm();
+        setFormData(emptyMovie);
     };
     const handleCancel = () => {
-        setOpen(false);
+        actions.closeForm();
+        setFormData(emptyMovie);
     };
     return (
-        isOpen && (
+        isFormOpen && (
             <section className="fixed inset-0 z-9999 flex   overflow-y-scroll backdrop-blur-lg bg-popover/80">
                 <form
                     onSubmit={handleSubmit}
                     className="bg-popover text-popover-foreground flex flex-col  justify-between gap-y-4 px-6 py-4 rounded-md w-full max-w-lg mx-auto h-fit"
                 >
                     <h1 className="text-xl font-serif">
-                        {edit ? 'Edit Movie' : 'Add a New Movie'}
+                        {editingId ? 'Edit Movie' : 'Add a New Movie'}
                     </h1>
 
                     <div className="space-y-2">
@@ -240,7 +216,7 @@ const Form = ({ movies, setMovies, isOpen, setOpen, edit, movie }: Props) => {
                             Cancel
                         </Button>
                         <Button type="submit" size={'lg'}>
-                            {edit ? 'Save Changes' : 'Add Movie'}
+                            {editingId ? 'Save Changes' : 'Add Movie'}
                         </Button>
                     </div>
                 </form>

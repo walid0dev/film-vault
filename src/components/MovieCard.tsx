@@ -1,20 +1,25 @@
 import { motion } from 'motion/react';
 import type { Movie } from '../types';
 import { FaStar } from 'react-icons/fa';
-import { getRandomPatternImg } from '../utils';
+import { cn, getRandomPatternImg } from '../utils';
 import ImageFallback from './ui/ImageFallback';
+import type { ClassValue } from 'clsx';
 
 type MovieCardProps = {
     movie: Movie;
     onClick?: () => void;
+    classes?: ClassValue;
 };
 
-const MovieCard = ({ movie, onClick }: MovieCardProps) => {
+const MovieCard = ({ movie, onClick, classes }: MovieCardProps) => {
     return (
         <motion.div
             layoutId={movie.id}
             onClick={onClick}
-            className="relative flex flex-col rounded-2xl corner-scoop bg-card text-card-foreground shadow-lg overflow-hidden cursor-pointer"
+            className={cn(
+                'relative flex flex-col rounded-2xl corner-scoop bg-card text-card-foreground shadow-lg overflow-hidden ',
+                classes
+            )}
         >
             <div className="relative h-92 w-full">
                 <ImageFallback
