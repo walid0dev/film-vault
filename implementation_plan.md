@@ -1,26 +1,49 @@
-# Implementation Plan
+# Rating System Implementation Plan
 
-## 1. Implement a State Management Solution
-- **Task:** Integrate a state management library like Redux or Zustand to manage the application's global state.
-- **Files to Modify:** `src/main.tsx`, `src/App.tsx`, `src/MovieList.tsx`
-- **New Files:** `src/store/store.ts`, `src/store/moviesSlice.ts`
+## Problem and approach
+The app already uses `rating` (0-10) and `votes` as IMDb-style source data for sorting, filtering, Hero, Featured, and list ordering.  
+To add a user-facing rating system while respecting the project constraint (**only `useState` and `useEffect`**), we should keep the current custom store pattern (`app-store.ts` + `useAppStore`) and extend movie data with user-rating fields instead of introducing Context/Reducer/external state libs.
 
-## 2. Implement Data Fetching and Caching
-- **Task:** Use a data fetching library like React Query or RTK Query to handle data fetching, caching, and synchronization.
-- **Files to Modify:** `src/MovieList.tsx`, `src/App.tsx`
-- **New Files:** `src/features/api/apiSlice.ts`
+The safest approach is:
+1. Keep existing IMDb fields (`rating`, `votes`) intact.
+2. Add user rating on a 1-5 star scale.
+3. Compute a derived "effective" score used by current sorting/filtering logic so user ratings influence rank and filters without rewriting the whole app architecture.
 
-## 3. Create a Reusable Form Component
-- **Task:** Develop a reusable form component with a dedicated state management solution like React Hook Form or Formik.
-- **Files to Modify:** `src/components/Form.tsx`
-- **New Files:** `src/hooks/useMovieForm.ts`
+## Todos
+1. Audit current rating flow
+   - Confirm every place `movie.rating` is used (`Hero`, `Featured`, `MovieList`, detail card, filter utilities).
+   - Identify all spots that must switch to derived/effective rating.
 
-## 4. Implement the Movie Edit Form
-- **Task:** Create a new route and component for the movie edit form, allowing users to update movie details.
-- **Files to Modify:** `src/App.tsx`, `src/components/MovieCardExpanded.tsx`
-- **New Files:** `src/components/EditMovieForm.tsx`, `src/pages/EditMoviePage.tsx`
+2. Extend movie model for user rating
+   - Update `Movie` type with user-rating field(s), e.g. `userRating?: number | null`.
+   - Add normalization helper(s) to safely handle old records loaded from `localStorage`.
 
-## 5. Add a Rating System
-- **Task:** Implement a rating system that allows users to rate movies and display the average rating.
-- **Files to Modify:** `src/components/MovieCard.tsx`, `src/components/MovieCardExpanded.tsx`, `src/types/index.ts`
-- **New Files:** `src/components/Rating.tsx`
+3. Add rating actions in store
+   - In `src/store/app-store.ts`, add actions to set/clear a movie’s user rating.
+   - Keep immutable update behavior and existing subscription mechanism.
+
+4. Build reusable rating UI
+   - Create `src/components/Rating.tsx` (star control + display mode).
+   - Wire interactive rating first in `MovieCardExpanded` (best context for per-movie actions).
+
+5. Wire derived rating into core logic
+   - In `src/hooks/index.ts`, introduce a helper for effective score (0-10 compatible).
+   - Update sorting/filtering (`getSortedMovies`, `getVisibleMovies`) to use effective score.
+   - Update Hero/Featured/list card displays to show user-aware rating consistently.
+
+6. Persistence and migration
+   - Ensure persisted movies include new user-rating field.
+   - Migrate older `localStorage` entries that lack the new field without data loss.
+
+7. Form and data-source clarity
+   - Keep IMDb fields in form explicit as source metadata, while user star rating is managed via rating UI.
+   - Avoid mixing IMDb and user-edit interaction in one ambiguous input.
+
+8. End-to-end behavior checks
+   - Confirm rating updates instantly affect list order, Hero/top 3, filters, and persisted state.
+   - Confirm add/edit/delete still behaves correctly with new fields.
+
+## Notes and constraints
+- No Context API, `useReducer`, Redux, Zustand, or extra state-management libraries for this feature.
+- Continue using current architecture (`useState` + `useEffect` + custom store module).
+- Keep existing numeric slider/filter UX stable; adapt via derived score mapping rather than large UI rewrites.

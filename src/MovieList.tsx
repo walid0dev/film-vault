@@ -12,7 +12,6 @@ const MovieList = () => {
         state: { movies, selectedId, ratingRange, releaseYearRange },
         actions,
     } = useAppStore();
-
     let minYear = new Date().getFullYear();
     let maxYear = new Date().getFullYear();
     for (const movie of movies) {
