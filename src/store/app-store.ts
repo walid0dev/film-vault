@@ -1,11 +1,8 @@
 import moviesData from '@/data/movie-data';
 import type { Movie } from '@/types';
-
-const storageKey = 'movies';
-
+const storageKey = 'movies'; // best practice or something
 export type RatingRange = [number, number];
 export type ReleaseYearRange = [number, number];
-
 export type AppState = {
     movies: Movie[];
     selectedId: string | null;
@@ -24,7 +21,7 @@ function isMovieArray(value: unknown): value is Movie[] {
 function loadMoviesFromStorage(): Movie[] | null {
     try {
         if (typeof window === 'undefined') return null;
-        const raw = window.localStorage.getItem(storageKey);
+        const raw = localStorage.getItem(storageKey);
         if (!raw) return null;
         const parsed: unknown = JSON.parse(raw);
         if (!isMovieArray(parsed)) return null;
@@ -36,37 +33,15 @@ function loadMoviesFromStorage(): Movie[] | null {
 
 export function saveMoviesToStorage(movies: Movie[]) {
     try {
-        if (typeof window === 'undefined') return;
-        window.localStorage.setItem(storageKey, JSON.stringify(movies));
-    } catch {
-        // ignore (private mode, quota, etc.)
+        localStorage.setItem(storageKey, JSON.stringify(movies));
+    } catch (e) {
+        console.error(e);
     }
 }
 
 const initialMovies = loadMoviesFromStorage() ?? moviesData;
 
-function getYearBounds(movies: Movie[]): { minYear: number; maxYear: number } {
-    let minYear = Number.POSITIVE_INFINITY;
-    let maxYear = Number.NEGATIVE_INFINITY;
-
-    for (const movie of movies) {
-        const year = new Date(movie.date).getFullYear();
-        if (!Number.isFinite(year)) continue;
-        if (year < minYear) minYear = year;
-        if (year > maxYear) maxYear = year;
-    }
-
-    if (!Number.isFinite(minYear) || !Number.isFinite(maxYear)) {
-        const currentYear = new Date().getFullYear();
-        return { minYear: 1900, maxYear: currentYear };
-    }
-
-    return { minYear, maxYear };
-}
-
-const { minYear: dataMinYear, maxYear: dataMaxYear } = getYearBounds(initialMovies);
-const currentYear = new Date().getFullYear();
-const defaultMaxYear = Math.max(dataMaxYear, currentYear);
+const defaultMaxYear = new Date().getFullYear();
 
 let state: AppState = {
     movies: initialMovies,
@@ -74,7 +49,7 @@ let state: AppState = {
     isFormOpen: false,
     editingId: null,
     ratingRange: [0, 10],
-    releaseYearRange: [dataMinYear, defaultMaxYear],
+    releaseYearRange: [1900, defaultMaxYear], // arbitrary year because it's not that serious
 };
 
 const listeners = new Set<Listener>();
@@ -84,7 +59,10 @@ export function getAppState(): AppState {
 }
 
 export function setAppState(next: AppState | ((prev: AppState) => AppState)) {
-    state = typeof next === 'function' ? (next as (p: AppState) => AppState)(state) : next;
+    state =
+        typeof next === 'function'
+            ? (next as (p: AppState) => AppState)(state)
+            : next;
     for (const listener of listeners) listener();
 }
 

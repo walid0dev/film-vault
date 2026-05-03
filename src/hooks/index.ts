@@ -62,15 +62,11 @@ export function getVisibleMovies(params: {
     const { movies, ratingRange, releaseYearRange } = params;
     const [minRating, maxRating] = ratingRange;
     const [minYear, maxYear] = releaseYearRange;
-
     return getSortedMovies(movies).filter((movie) => {
         const ratingOk = movie.rating >= minRating && movie.rating <= maxRating;
 
         const year = new Date(movie.date).getFullYear();
-        const yearOk = Number.isFinite(year)
-            ? year >= minYear && year <= maxYear
-            : true;
-
+        const yearOk = year >= minYear && year <= maxYear;
         return ratingOk && yearOk;
     });
 }
